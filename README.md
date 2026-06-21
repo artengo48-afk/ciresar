@@ -20,14 +20,6 @@ A cherry-picking job with a 3D pick minigame. **Multi-framework** — auto-detec
 No external map/prop pack is required — the trees use base-game props
 (`prop_tree_jacada_02` / `prop_joshua_tree_02b`).
 
-### Optional — core_ui
-If you run the `core_ui` resource, the `[E]` interaction prompt and the
-notifications automatically route through it (one consistent look across your
-server). If `core_ui` isn't present, `ciresar` falls back to its own built-in
-3D text prompt + toast — **it works with or without core_ui**.
-
----
-
 ## 2. The cherry item
 
 Picking a cherry gives the player a **`cherry`** inventory item; the vendor buys
@@ -82,7 +74,6 @@ INSERT INTO items (name, label, weight, rare, can_remove) VALUES
 |------------------------|------------------------------------------------------------|
 | Framework              | one of vRP / QBox / QBCore / ESX (auto-detected)           |
 | Inventory              | only if `Config.items.enable = true` (ox / qb / native)    |
-| `core_ui`              | optional (nicer prompts/notifications; not required)       |
 | MySQL / prop packs     | none                                                       |
 
 ---
