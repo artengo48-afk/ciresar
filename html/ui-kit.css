@@ -1,0 +1,413 @@
+/* ============================================================
+   FXSERVER — UI KIT  (server-wide design system)
+   ------------------------------------------------------------
+   Copy this file UNCHANGED into every resource. Per-job theming
+   is done ONLY by overriding --accent / --accent-rgb in the
+   resource's own style.css. Everything else stays identical so
+   every UI on the server shares the same look & feel.
+
+   HARD RULES baked in:
+   - NO backdrop-filter (FiveM CEF renders it on black). Depth
+     comes from layered shadows + translucent solid panels.
+   - All interactive elements get pointer-events:auto (body is
+     pointer-events:none so clicks pass through when idle).
+   ============================================================ */
+
+:root {
+    /* ---- Theme accent (the server's brand colour — change just these two) ---- */
+    --accent:      #4ea1ff;          /* server brand = azure */
+    --accent-rgb:  78, 161, 255;     /* same colour as RGB triple */
+
+    /* ---- Surfaces ---- */
+    --scrim:       rgba(6, 8, 12, 0.55);            /* dim behind panel  */
+    --panel-top:   rgba(28, 33, 44, 0.97);          /* panel gradient hi */
+    --panel-bot:   rgba(16, 19, 26, 0.98);          /* panel gradient lo */
+    --surface:     rgba(255, 255, 255, 0.045);      /* inset rows/cards  */
+    --surface-2:   rgba(255, 255, 255, 0.07);       /* hover surface     */
+    --stroke:      rgba(255, 255, 255, 0.09);       /* hairline borders  */
+    --stroke-soft: rgba(255, 255, 255, 0.06);
+
+    /* ---- Text ---- */
+    --text:        #eef1f6;
+    --text-dim:    rgba(238, 241, 246, 0.56);
+    --text-faint:  rgba(238, 241, 246, 0.34);
+
+    /* ---- Status ---- */
+    --good:        #46d17f;
+    --good-rgb:    70, 209, 127;
+    --warn:        #ffb020;
+    --warn-rgb:    255, 176, 32;
+    --bad:         #ff5c5c;
+    --bad-rgb:     255, 92, 92;
+
+    /* ---- Geometry ---- */
+    --r-lg: 20px;
+    --r-md: 13px;
+    --r-sm: 9px;
+
+    /* ---- Elevation ---- */
+    --shadow:
+        0 24px 60px rgba(0, 0, 0, 0.55),
+        0 6px 18px rgba(0, 0, 0, 0.40),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    --font: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    font-family: var(--font);
+    color: var(--text);
+    pointer-events: none;            /* clicks pass through when idle */
+    -webkit-font-smoothing: antialiased;
+}
+
+.uk-hidden { display: none !important; }
+
+/* ── OVERLAY (dim scrim + centred content) ───────────────── */
+.uk-overlay {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--scrim);
+    pointer-events: auto;
+    z-index: 9000;
+    animation: ukOverlayIn 0.18s ease both;
+}
+@keyframes ukOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── PANEL (the card every screen lives in) ──────────────── */
+.uk-panel {
+    width: 420px;
+    max-width: 92vw;
+    background: linear-gradient(180deg, var(--panel-top), var(--panel-bot));
+    border: 1px solid var(--stroke);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    animation: ukPanelIn 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.uk-panel.wide { width: 560px; }
+@keyframes ukPanelIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* thin accent line along the very top of the panel */
+.uk-panel::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(var(--accent-rgb), 0.85) 30%,
+        rgba(var(--accent-rgb), 0.85) 70%,
+        transparent);
+}
+
+/* ── HEADER ──────────────────────────────────────────────── */
+.uk-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--stroke-soft);
+}
+
+.uk-chip {
+    width: 42px; height: 42px;
+    flex-shrink: 0;
+    border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(var(--accent-rgb), 0.13);
+    border: 1px solid rgba(var(--accent-rgb), 0.30);
+    box-shadow: inset 0 0 16px rgba(var(--accent-rgb), 0.12);
+}
+.uk-chip svg { width: 22px; height: 22px; }
+.uk-chip svg [stroke] { stroke: var(--accent); }
+.uk-chip svg [fill]:not([fill="none"]) { fill: var(--accent); }
+
+.uk-htext { flex: 1; min-width: 0; }
+.uk-title {
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    line-height: 1.2;
+}
+.uk-subtitle {
+    font-size: 11.5px; font-weight: 500;
+    color: var(--text-dim);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.uk-close {
+    width: 28px; height: 28px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 1px solid var(--stroke);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 15px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: auto;
+    transition: background 0.15s, color 0.15s;
+}
+.uk-close:hover { background: var(--surface-2); color: var(--text); }
+
+/* ── BODY ────────────────────────────────────────────────── */
+.uk-body {
+    padding: 16px 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+/* ── STAT ROW (label left / value right) ─────────────────── */
+.uk-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 13px;
+    background: var(--surface);
+    border: 1px solid var(--stroke-soft);
+    border-radius: var(--r-md);
+}
+.uk-stat__label {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+.uk-stat__value {
+    font-size: 13.5px;
+    color: var(--text);
+    font-weight: 700;
+}
+
+/* ── METER (progress / fill bar) ─────────────────────────── */
+.uk-meter { display: flex; flex-direction: column; gap: 7px; }
+.uk-meter__top {
+    display: flex; justify-content: space-between; align-items: baseline;
+}
+.uk-meter__label {
+    font-size: 12.5px; color: var(--text-dim); font-weight: 500;
+}
+.uk-meter__val {
+    font-size: 12.5px; color: var(--accent); font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.uk-meter__track {
+    height: 9px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--stroke-soft);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.uk-meter__fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg,
+        rgba(var(--accent-rgb), 0.75),
+        var(--accent));
+    box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.55);
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── BADGE (status pill) ─────────────────────────────────── */
+.uk-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.02em;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--stroke);
+    color: var(--text-dim);
+}
+.uk-badge::before {
+    content: '';
+    width: 7px; height: 7px; border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 7px currentColor;
+}
+.uk-badge.good { color: var(--good); background: rgba(var(--good-rgb), 0.12); border-color: rgba(var(--good-rgb), 0.30); }
+.uk-badge.warn { color: var(--warn); background: rgba(var(--warn-rgb), 0.12); border-color: rgba(var(--warn-rgb), 0.30); }
+.uk-badge.bad  { color: var(--bad);  background: rgba(var(--bad-rgb), 0.12);  border-color: rgba(var(--bad-rgb), 0.30); }
+
+/* ── FOOTER + BUTTONS ────────────────────────────────────── */
+.uk-footer {
+    display: flex; gap: 10px;
+    padding: 4px 20px 20px;
+}
+.uk-footer .uk-btn { flex: 1; }
+
+.uk-btn {
+    pointer-events: auto;
+    cursor: pointer;
+    border: 1px solid var(--stroke);
+    border-radius: var(--r-md);
+    padding: 12px 16px;
+    font-family: var(--font);
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    background: var(--surface);
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.06s, background 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.uk-btn:hover { background: var(--surface-2); }
+.uk-btn:active { transform: translateY(1px); }
+
+.uk-btn.primary {
+    color: #161208;
+    background: linear-gradient(180deg, var(--accent), rgba(var(--accent-rgb), 0.86));
+    border-color: rgba(var(--accent-rgb), 0.55);
+    box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.28);
+}
+.uk-btn.primary:hover {
+    box-shadow: 0 6px 22px rgba(var(--accent-rgb), 0.42);
+}
+
+.uk-btn.ghost { background: transparent; }
+.uk-btn.ghost:hover { background: var(--surface); }
+
+.uk-btn:disabled,
+.uk-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.uk-btn svg { width: 16px; height: 16px; }
+
+/* ── STAGE (neutral framed area for minigames) ───────────── */
+.uk-stage {
+    position: relative;
+    background:
+        radial-gradient(120% 100% at 50% 0%, rgba(var(--accent-rgb), 0.06), transparent 60%),
+        rgba(0, 0, 0, 0.28);
+    border: 1px solid var(--stroke-soft);
+    border-radius: var(--r-md);
+    overflow: hidden;
+}
+
+/* ── TIMING BAR (reusable minigame primitive) ────────────── */
+/* A needle sweeps the track; player acts when it's over the zone.
+   Used by smoker (step 2) and frame-removal (step 5). */
+.uk-timing {
+    position: relative;
+    height: 46px;
+    border-radius: var(--r-sm);
+    background:
+        repeating-linear-gradient(90deg, transparent 0 23px, rgba(255,255,255,0.03) 23px 24px),
+        rgba(0, 0, 0, 0.38);
+    border: 1px solid var(--stroke-soft);
+    overflow: hidden;
+}
+.uk-timing__zone {
+    position: absolute; top: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(var(--good-rgb), 0.30), rgba(var(--good-rgb), 0.12));
+    border-left:  1px solid rgba(var(--good-rgb), 0.65);
+    border-right: 1px solid rgba(var(--good-rgb), 0.65);
+    box-shadow: inset 0 0 16px rgba(var(--good-rgb), 0.28);
+    transition: left 0.16s ease, width 0.16s ease;
+}
+/* optional "perfect" sub-zone inside the green zone (precision minigames) */
+.uk-timing__core {
+    position: absolute; top: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.55), rgba(var(--accent-rgb), 0.22));
+    border-left:  1px solid var(--accent);
+    border-right: 1px solid var(--accent);
+    box-shadow: inset 0 0 14px rgba(var(--accent-rgb), 0.45);
+    transition: left 0.16s ease, width 0.16s ease;
+}
+.uk-timing__needle {
+    position: absolute; top: -2px; bottom: -2px;
+    width: 4px; margin-left: -2px;
+    border-radius: 2px;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.95);
+}
+.uk-timing.hit  { animation: ukFlashGood 0.25s ease; }
+.uk-timing.miss { animation: ukFlashBad  0.30s ease; }
+@keyframes ukFlashGood { 50% { box-shadow: inset 0 0 0 2px rgba(var(--good-rgb), 0.7); } }
+@keyframes ukFlashBad  { 50% { box-shadow: inset 0 0 0 2px rgba(var(--bad-rgb), 0.8); } }
+
+/* ── PIPS (attempts / lives row) ─────────────────────────── */
+.uk-pips { display: flex; gap: 6px; justify-content: center; }
+.uk-pip {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--stroke);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.uk-pip.lost { background: var(--bad); box-shadow: 0 0 7px rgba(var(--bad-rgb), 0.7); border-color: transparent; }
+
+/* ── Inline minigame message ─────────────────────────────── */
+.uk-mg-msg {
+    text-align: center;
+    font-size: 12px; font-weight: 700;
+    min-height: 15px;
+    letter-spacing: 0.02em;
+    color: var(--text-dim);
+}
+.uk-mg-msg.good { color: var(--good); }
+.uk-mg-msg.warn { color: var(--warn); }
+.uk-mg-msg.bad  { color: var(--bad); }
+
+/* ── HINT line ───────────────────────────────────────────── */
+.uk-hint {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    text-align: center;
+    letter-spacing: 0.03em;
+}
+.uk-hint b { color: var(--text-dim); font-weight: 700; }
+
+/* ── TOAST (corner notification) ─────────────────────────── */
+.uk-toast-wrap {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 9500;
+    display: flex; flex-direction: column-reverse; gap: 8px;
+    align-items: center;
+    pointer-events: none;
+}
+.uk-toast {
+    background: linear-gradient(180deg, var(--panel-top), var(--panel-bot));
+    border: 1px solid var(--stroke);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--r-sm);
+    box-shadow: var(--shadow);
+    padding: 11px 16px;
+    font-size: 13px; font-weight: 600;
+    color: var(--text);
+    animation: ukToastIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.uk-toast.good { border-left-color: var(--good); }
+.uk-toast.warn { border-left-color: var(--warn); }
+.uk-toast.bad  { border-left-color: var(--bad); }
+.uk-toast.out  { animation: ukToastOut 0.25s ease forwards; }
+@keyframes ukToastIn  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ukToastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(12px); } }
+
+/* ── Shared utility animations ───────────────────────────── */
+@keyframes ukPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.45); }
+    50%      { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0); }
+}
+@keyframes ukShake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+.uk-shake { animation: ukShake 0.35s ease; }

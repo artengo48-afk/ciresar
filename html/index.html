@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ciresar</title>
+    <link rel="stylesheet" href="ui-kit.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- ── PERSISTENT BASKET HUD (top-left) ── -->
+    <div id="hud" class="uk-hidden">
+        <div class="hud-ico">
+            <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="9"  cy="16" r="4.2" fill="currentColor"/>
+                <circle cx="15" cy="16" r="4.2" fill="currentColor"/>
+                <path d="M9 12 Q12 4 17 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M15 12 Q14 7 17 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="hud-body">
+            <div class="hud-title" id="hud-title">Cherry Basket</div>
+            <div class="uk-meter">
+                <div class="uk-meter__top">
+                    <span class="hud-count"><b id="hud-count">0</b> / <span id="hud-cap">50</span></span>
+                </div>
+                <div class="uk-meter__track"><div class="uk-meter__fill" id="hud-fill" style="width:0%"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── MINIGAME OVERLAY ── -->
+    <div id="mg" class="uk-overlay uk-hidden">
+        <div class="uk-panel wide">
+
+            <div class="uk-header">
+                <div class="uk-chip">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="9"  cy="16" r="4.2" fill="currentColor"/>
+                        <circle cx="15" cy="16" r="4.2" fill="currentColor"/>
+                        <path d="M9 12 Q12 4 17 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        <path d="M15 12 Q14 7 17 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="uk-htext">
+                    <div class="uk-title" id="mg-title">Cherry Picking</div>
+                    <div class="uk-subtitle" id="mg-sub">Click the cherries</div>
+                </div>
+                <div class="mg-count"><b id="mg-count">0</b><span class="mg-count-sep">/</span><span id="mg-cap">50</span></div>
+                <button class="uk-close" id="mg-close" title="ESC">&times;</button>
+            </div>
+
+            <div class="uk-body">
+                <div class="uk-stage" id="stage">
+                    <img class="tree-img" src="tree.png" alt="" />
+                    <div id="cherries"></div>
+
+                    <!-- Basket (fills up as cherries land in it) -->
+                    <div id="basket">
+                        <svg id="basket-svg" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <clipPath id="bowlClip">
+                                    <path d="M41 57 L159 57 L146 131 L54 131 Z"/>
+                                </clipPath>
+                                <linearGradient id="cherryGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0"  stop-color="#ff5d70"/>
+                                    <stop offset="1"  stop-color="#b21030"/>
+                                </linearGradient>
+                            </defs>
+
+                            <!-- handle (behind) -->
+                            <path d="M64 58 Q100 14 136 58" fill="none" stroke="#6b4a18" stroke-width="7" stroke-linecap="round"/>
+
+                            <!-- body -->
+                            <path d="M38 56 L162 56 L147 133 L53 133 Z" fill="#c08a3e"/>
+
+                            <!-- rising cherry fill (clipped to bowl interior) -->
+                            <g clip-path="url(#bowlClip)">
+                                <rect id="fillRect" x="38" y="131" width="124" height="0" fill="url(#cherryGrad)"/>
+                                <ellipse id="fillTop" cx="100" cy="131" rx="60" ry="6" fill="#ff7184" opacity="0"/>
+                            </g>
+
+                            <!-- weave over body -->
+                            <g stroke="#6b4a18" opacity="0.6">
+                                <line x1="42" y1="76"  x2="158" y2="76"  stroke-width="1.4"/>
+                                <line x1="46" y1="97"  x2="154" y2="97"  stroke-width="1.4"/>
+                                <line x1="50" y1="118" x2="150" y2="118" stroke-width="1.4"/>
+                            </g>
+                            <g stroke="#6b4a18" opacity="0.32" stroke-width="1">
+                                <line x1="74"  y1="56" x2="66"  y2="133"/>
+                                <line x1="100" y1="56" x2="100" y2="133"/>
+                                <line x1="126" y1="56" x2="134" y2="133"/>
+                            </g>
+
+                            <!-- rim (front, drawn last) -->
+                            <ellipse id="rim" cx="100" cy="56" rx="62" ry="11" fill="#d39a4a"/>
+                            <ellipse cx="100" cy="56" rx="62" ry="11" fill="none" stroke="#6b4a18" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="uk-meter">
+                    <div class="uk-meter__top">
+                        <span class="uk-meter__label" id="mg-basket-label">Basket</span>
+                        <span class="uk-meter__val"><span id="mg-meter-count">0</span> / <span id="mg-meter-cap">50</span></span>
+                    </div>
+                    <div class="uk-meter__track"><div class="uk-meter__fill" id="mg-meter-fill" style="width:0%"></div></div>
+                </div>
+            </div>
+
+            <div class="uk-hint mg-hint" id="mg-hint">Click cherries · <b>ESC</b> to close</div>
+        </div>
+    </div>
+
+    <!-- ── SELL OVERLAY ── -->
+    <div id="sell" class="uk-overlay uk-hidden">
+        <div class="uk-panel">
+            <div class="uk-header">
+                <div class="uk-chip">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M4 7h16l-1.4 12.2a2 2 0 0 1-2 1.8H7.4a2 2 0 0 1-2-1.8L4 7Z" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M8.5 7a3.5 3.5 0 0 1 7 0" stroke="currentColor" stroke-width="1.6"/>
+                    </svg>
+                </div>
+                <div class="uk-htext">
+                    <div class="uk-title" id="sell-title">Sell Cherries</div>
+                    <div class="uk-subtitle" id="sell-sub">Cherry Vendor</div>
+                </div>
+                <button class="uk-close" id="sell-x" title="ESC">&times;</button>
+            </div>
+
+            <div class="uk-body" id="sell-body">
+                <div class="uk-stat">
+                    <span class="uk-stat__label" id="sell-have-lbl">Cherries</span>
+                    <span class="uk-stat__value" id="sell-have">0</span>
+                </div>
+                <div class="uk-stat">
+                    <span class="uk-stat__label" id="sell-price-lbl">Price / cherry</span>
+                    <span class="uk-stat__value" id="sell-price">$0 – $0</span>
+                </div>
+                <div class="uk-stat">
+                    <span class="uk-stat__label" id="sell-est-lbl">Estimated</span>
+                    <span class="uk-stat__value" id="sell-est" style="color:var(--accent)">$0 – $0</span>
+                </div>
+            </div>
+
+            <div class="uk-body uk-hidden" id="sell-result">
+                <div class="sell-done" id="sell-done-txt">Sold!</div>
+            </div>
+
+            <div class="uk-footer" id="sell-footer">
+                <button class="uk-btn ghost" id="sell-cancel">Cancel</button>
+                <button class="uk-btn primary" id="sell-confirm">Sell all</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── OWN TOAST (fallback only, when core_ui is absent) ── -->
+    <div class="uk-toast-wrap" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
